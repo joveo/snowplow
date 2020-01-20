@@ -26,8 +26,14 @@ import io.circe.Json
 import io.circe.parser._
 import io.circe.syntax._
 import org.apache.thrift.TSerializer
-
 import model._
+
+import scala.collection.JavaConverters._
+import org.apache.commons.codec.binary.Base64
+import java.net.URLDecoder
+
+import org.joda.time.format.DateTimeFormat
+
 
 /** Object handling splitting an array of strings correctly */
 object SplitBatch {
@@ -80,8 +86,64 @@ object SplitBatch {
    * @return a List of Good and Bad events
    */
   def splitAndSerializePayload(event: CollectorPayload, maxBytes: Int): EventSerializeResult = {
+
+    def parseUrlParameters(url: String) = {
+      url.split("&").map( v => {
+        val m =  v.split("=", 2).map(s => URLDecoder.decode(s, "UTF-8"))
+        m(0) -> m(1)
+      }).toMap
+    }
+
     val serializer = ThriftSerializer.get()
-    val everythingSerialized = serializer.serialize(event)
+    println("event")
+    println(event)
+
+    val base64data = parseUrlParameters(event.querystring).getOrElse("ue_px", "")
+    val data_json = play.api.libs.json.Json.parse(new String(Base64.decodeBase64(base64data)))
+
+    println(data_json)
+
+    val eventId = (data_json \ "data" \ "data" \ "id").get.toString
+    val eventType = (data_json \ "data" \ "data" \ "type").get.toString
+    val eventKey = (data_json \ "data" \ "data" \ "key").get.toString
+    val eventValue = (data_json \ "data" \ "data" \ "value").get.toString
+    val eventClient = (data_json \ "data" \ "data" \ "client").get.toString
+    val eventDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(event.timestamp)
+
+    println(eventId)
+    println(eventType)
+    println(eventKey)
+    println(eventValue)
+    println(eventClient)
+    println(eventDate)
+
+    val new_event = JSONCollectorPayload(
+      event.ipAddress,
+      event.timestamp,
+      event.encoding,
+      event.collector,
+      event.userAgent,
+      event.refererUri,
+      event.path,
+      event.querystring,
+      event.body,
+      event.headers.asScala.toList,
+      event.contentType,
+      event.hostname,
+      event.networkUserId,
+      eventId,
+      eventType,
+      eventKey,
+      eventValue,
+      eventClient,
+      eventDate
+    )
+
+    val new_event_json = JSONCollectorPayload.write(new_event)
+
+    println(new_event_json)
+
+    val everythingSerialized = (new_event_json.toString + "\n").getBytes()
     val wholeEventBytes = getSize(everythingSerialized)
 
     // If the event is below the size limit, no splitting is necessary

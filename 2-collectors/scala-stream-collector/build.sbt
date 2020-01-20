@@ -36,7 +36,11 @@ lazy val commonDependencies = Seq(
   Dependencies.Libraries.akkaTestkit,
   Dependencies.Libraries.akkaHttpTestkit,
   Dependencies.Libraries.akkaStreamTestkit,
-  Dependencies.Libraries.specs2
+  Dependencies.Libraries.specs2,
+
+  Dependencies.Libraries.jacksonDatabind,
+  Dependencies.Libraries.jacksonCbor,
+  Dependencies.Libraries.play
 )
 
 lazy val buildSettings = Seq(

@@ -43,6 +43,9 @@ object Dependencies {
     val badRows              = "0.1.0"
     // Scala (test only)
     val specs2               = "4.5.1"
+
+    val jackson              = "2.9.10"
+    val play                 = "2.7.0"
   }
 
   object Libraries {
@@ -74,5 +77,10 @@ object Dependencies {
     val akkaTestkit          = "com.typesafe.akka"     %% "akka-testkit"           % V.akka     % Test
     val akkaHttpTestkit      = "com.typesafe.akka"     %% "akka-http-testkit"      % V.akkaHttp % Test
     val akkaStreamTestkit    = "com.typesafe.akka"     %% "akka-stream-testkit"    % V.akka     % Test
+
+    val jacksonCbor      = "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-cbor"      % V.jackson
+    val jacksonDatabind  = "com.fasterxml.jackson.core"       %  "jackson-databind"             % V.jackson
+    val play             = "com.typesafe.play"         %% "play-json"              % V.play
+
   }
 }
