@@ -41,7 +41,9 @@ lazy val commonDependencies = Seq(
 
   Dependencies.Libraries.jacksonDatabind,
   Dependencies.Libraries.jacksonCbor,
-  Dependencies.Libraries.play
+  Dependencies.Libraries.play,
+  Dependencies.Libraries.sqs,
+  Dependencies.Libraries.j4s
 )
 
 lazy val buildSettings = Seq(

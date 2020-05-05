@@ -46,7 +46,8 @@ object Dependencies {
 
     val jackson              = "2.9.10"
     val play                 = "2.7.0"
-    val sqs                  = "1.11.637"
+    val sqs                  = "1.11.774"
+    val j4s                  = "3.6.7"
   }
 
   object Libraries {
@@ -82,6 +83,7 @@ object Dependencies {
     val jacksonCbor      = "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-cbor"      % V.jackson
     val jacksonDatabind  = "com.fasterxml.jackson.core"       %  "jackson-databind"             % V.jackson
     val play             = "com.typesafe.play"         %% "play-json"              % V.play
-    val sqs              = "com.amazonaws"             %% "aws-java-sdk-sqs"       % V.sqs
+    val sqs              = "com.amazonaws"             % "aws-java-sdk-sqs"       % V.sqs
+    val j4s              = "org.json4s"                %% "json4s-jackson"         % V.j4s
   }
 }

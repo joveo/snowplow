@@ -12,17 +12,37 @@
  */
 package com.snowplowanalytics.snowplow.collectors.scalastream
 package utils
+
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets.UTF_8
 //import java.time.Instant
 //
 //import cats.syntax.either._
 //import com.snowplowanalytics.iglu.core._
 //import com.snowplowanalytics.iglu.core.circe.CirceIgluCodecs._
 //import com.snowplowanalytics.snowplow.badrows._
+import com.snowplowanalytics.snowplow.CollectorPayload.thrift.model1.CollectorPayload
+import io.circe.Json
+import org.json4s.jackson.Serialization.{write}
+import org.json4s.DefaultFormats
 //import io.circe.parser._
 //import io.circe.syntax._
 //import org.apache.thrift.TSerializer
+import model._
+
+import scala.collection.JavaConverters._
+import org.apache.commons.codec.binary.Base64
+import java.net.URLDecoder
+
+import org.joda.time.format.DateTimeFormat
+
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.sqs.{AmazonSQS, AmazonSQSClientBuilder}
+import com.amazonaws.services.sqs.model.{SendMessageRequest}
+
 /** Object handling splitting an array of strings correctly */
 object SplitBatch {
+  implicit val format = DefaultFormats
 
   // Serialize Thrift CollectorPayload objects
 //  val ThriftSerializer = new ThreadLocal[TSerializer] {
@@ -94,8 +114,14 @@ object SplitBatch {
     val eventKey = (data_json \ "data" \ "data" \ "key").get.toString
     val eventValue = (data_json \ "data" \ "data" \ "value").get.toString
     val eventClient = (data_json \ "data" \ "data" \ "client").get.toString
-    val candidateId = (data_json \ "data" \ "data" \ "candidateId").get.toString
-    val jobId = (data_json \ "data" \ "data" \ "jobId").get.toString
+    val candidateId = (data_json \ "data" \ "data" \ "candidateId").isEmpty match {
+      case true => {""}
+      case false => {(data_json \ "data" \ "data" \ "candidateId").get.toString}
+    }
+    val jobId = (data_json \ "data" \ "data" \ "jobId").isEmpty match {
+      case true => {""}
+      case false => {(data_json \ "data" \ "data" \ "jobId").get.toString}
+    }
     val eventDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(event.timestamp)
 
     println(eventId)
@@ -135,7 +161,7 @@ object SplitBatch {
 
     println(new_event_json)
     val SQS: AmazonSQS = AmazonSQSClientBuilder.standard.withRegion(Regions.US_EAST_1).build
-    val sendMessageRequest = new SendMessageRequest("https://sqs.us-east-1.amazonaws.com/997116068644/cdp-staging-snowplow-tracker", new_event_json)
+    val sendMessageRequest = new SendMessageRequest("https://sqs.us-east-1.amazonaws.com/997116068644/cdp-staging-snowplow-tracker", write(new_event))
     SQS.sendMessage(sendMessageRequest)
 
     val everythingSerialized = (new_event_json.toString + "\n").getBytes()
