@@ -12,29 +12,15 @@
  */
 package com.snowplowanalytics.snowplow.collectors.scalastream
 package utils
-
-import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets.UTF_8
 //import java.time.Instant
 //
 //import cats.syntax.either._
 //import com.snowplowanalytics.iglu.core._
 //import com.snowplowanalytics.iglu.core.circe.CirceIgluCodecs._
 //import com.snowplowanalytics.snowplow.badrows._
-import com.snowplowanalytics.snowplow.CollectorPayload.thrift.model1.CollectorPayload
-import io.circe.Json
 //import io.circe.parser._
 //import io.circe.syntax._
 //import org.apache.thrift.TSerializer
-import model._
-
-import scala.collection.JavaConverters._
-import org.apache.commons.codec.binary.Base64
-import java.net.URLDecoder
-
-import org.joda.time.format.DateTimeFormat
-
-
 /** Object handling splitting an array of strings correctly */
 object SplitBatch {
 
@@ -108,6 +94,8 @@ object SplitBatch {
     val eventKey = (data_json \ "data" \ "data" \ "key").get.toString
     val eventValue = (data_json \ "data" \ "data" \ "value").get.toString
     val eventClient = (data_json \ "data" \ "data" \ "client").get.toString
+    val candidateId = (data_json \ "data" \ "data" \ "candidateId").get.toString
+    val jobId = (data_json \ "data" \ "data" \ "jobId").get.toString
     val eventDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(event.timestamp)
 
     println(eventId)
@@ -116,6 +104,8 @@ object SplitBatch {
     println(eventValue)
     println(eventClient)
     println(eventDate)
+    println(candidateId)
+    println(jobId)
 
     val new_event = JSONCollectorPayload(
       event.ipAddress,
@@ -136,12 +126,17 @@ object SplitBatch {
       eventKey,
       eventValue,
       eventClient,
-      eventDate
+      eventDate,
+      candidateId,
+      jobId
     )
 
     val new_event_json = JSONCollectorPayload.write(new_event)
 
     println(new_event_json)
+    val SQS: AmazonSQS = AmazonSQSClientBuilder.standard.withRegion(Regions.US_EAST_1).build
+    val sendMessageRequest = new SendMessageRequest("https://sqs.us-east-1.amazonaws.com/997116068644/cdp-staging-snowplow-tracker", new_event_json)
+    SQS.sendMessage(sendMessageRequest)
 
     val everythingSerialized = (new_event_json.toString + "\n").getBytes()
     val wholeEventBytes = getSize(everythingSerialized)

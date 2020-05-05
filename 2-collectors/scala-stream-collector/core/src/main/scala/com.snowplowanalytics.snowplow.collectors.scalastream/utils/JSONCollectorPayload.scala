@@ -20,7 +20,9 @@ case class JSONCollectorPayload(ipAddress: String,
                                 eventKey: String,
                                 eventValue: String,
                                 eventClient: String,
-                                eventDate: String
+                                eventDate: String,
+                                candidateId: String,
+                                jobId: String
                                )
 
 object JSONCollectorPayload {
