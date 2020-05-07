@@ -109,18 +109,18 @@ object SplitBatch {
 
     println(data_json)
 
-    val eventId = (data_json \ "data" \ "data" \ "id").get.toString
-    val eventType = (data_json \ "data" \ "data" \ "type").get.toString
-    val eventKey = (data_json \ "data" \ "data" \ "key").get.toString
-    val eventValue = (data_json \ "data" \ "data" \ "value").get.toString
-    val eventClient = (data_json \ "data" \ "data" \ "client").get.toString
+    val eventId = (data_json \ "data" \ "data" \ "id").get.as[String]
+    val eventType = (data_json \ "data" \ "data" \ "type").get.as[String]
+    val eventKey = (data_json \ "data" \ "data" \ "key").get.as[String]
+    val eventValue = (data_json \ "data" \ "data" \ "value").get.as[String]
+    val eventClient = (data_json \ "data" \ "data" \ "client").get.as[String]
     val candidateId = (data_json \ "data" \ "data" \ "candidateId").isEmpty match {
       case true => {""}
-      case false => {(data_json \ "data" \ "data" \ "candidateId").get.toString}
+      case false => {(data_json \ "data" \ "data" \ "candidateId").get.as[String]}
     }
     val jobId = (data_json \ "data" \ "data" \ "jobId").isEmpty match {
       case true => {""}
-      case false => {(data_json \ "data" \ "data" \ "jobId").get.toString}
+      case false => {(data_json \ "data" \ "data" \ "jobId").get.as[String]}
     }
     val eventDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(event.timestamp)
 
